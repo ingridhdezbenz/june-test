@@ -59,3 +59,19 @@ def home(request):
     context = {"price":price, "volume":volume, "exportData":exportData, "exportDataRaw":exportDataRaw}
 
     return render(request, 'dashboard/home.html', context=context)
+
+def bitso(request):
+    volume = []
+    exportData = []
+
+    response = requests.get('https://api.bitso.com/v3/ohlc?book=xrp_mxn&time_bucket=1800')
+    data = response.json()
+    dictionary = Dict(data)
+
+    for x in dictionary.payload:
+        volume.append([x.bucket_start_time, float(x.volume)])
+        exportData.append([datetime.fromtimestamp(x.bucket_start_time/1000.0).strftime('%Y-%m-%d %H:%M:%S'), float(x.volume)])
+
+    context = {"volume":volume, "exportData":exportData}
+
+    return render(request, 'dashboard/bitso.html', context=context)
