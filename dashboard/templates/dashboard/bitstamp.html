@@ -1,0 +1,156 @@
+{% extends "dashboard/base.html" %} {% block content %}
+<h1>XRP_EUR</h1>
+<p>Time is CET minus 2hrs</p>
+
+<div id="container" style="height: 400px; min-width: 310px"></div>
+
+<button onclick="download_csv_file()">Download 30 min Volume</button>
+
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<script src="https://code.highcharts.com/stock/modules/data.js"></script>
+<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/stock/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+<script>
+    exportData = {{exportData|safe}};
+  
+    //create a user-defined function to download CSV file
+    function download_csv_file() {
+  
+        //define the heading for each row of the data
+        var csv = 'Timestamp,Volume\n';
+  
+        //merge the data with CSV
+        exportData.forEach(function(row) {
+                csv += row.join(',');
+                csv += "\n";
+        });
+  
+  
+        var hiddenElement = document.createElement('a');
+        hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+        hiddenElement.target = '_blank';
+  
+        //provide the name for the CSV file to be downloaded
+        hiddenElement.download = 'bitstamp_30min.csv';
+        hiddenElement.click();
+    }
+</script>
+<script>
+    volume = {{volume|safe}};
+  
+     // create the chart
+     Highcharts.stockChart("container", {
+         title: {
+         text: "Bitstamp trades",
+         },
+  
+         subtitle: {
+         text: "XRP_EUR",
+         },
+  
+         xAxis: {
+         gapGridLineWidth: 0,
+         },
+         yAxis: [
+         {
+             labels: {
+             y: -2,
+             },
+             opposite: false,
+             showLastLabel: false,
+             title: {
+             text: "",
+             align: "high",
+             offset: 0,
+             rotation: 0,
+             y: -1,
+             x: -8,
+             style: {
+                 fontWeight: "bold",
+             },
+             },
+             events: {},
+             lineWidth: "2",
+             type: "linear",
+             maxPadding: 0.2,
+             floor: "",
+             id: "axis-main",
+             height: "0%",
+             index: 0,
+         },
+         {
+             labels: {
+             y: -2,
+             },
+             opposite: false,
+             showLastLabel: false,
+             title: {
+             text: "Volume",
+             align: "high",
+             offset: 0,
+             rotation: 0,
+             y: -3,
+             x: -7,
+             style: {
+                 fontWeight: "bold",
+             },
+             },
+             events: {},
+             id: "axis-volume",
+             offset: 0,
+             lineWidth: 2,
+             min: 0,
+             top: "0%",
+             height: "100%",
+             index: 1,
+         },
+         ],
+  
+         plotOptions: {
+          series: {
+              connectNulls: true
+          }
+      },
+  
+         rangeSelector: {
+         buttons: [
+             {
+             type: "hour",
+             count: 1,
+             text: "1h",
+             },
+             {
+             type: "day",
+             count: 1,
+             text: "1D",
+             },
+             {
+             type: "all",
+             count: 1,
+             text: "All",
+             },
+         ],
+         selected: 1,
+         inputEnabled: false,
+         },
+  
+         series: [
+         {
+             name: "volume",
+             type: "column",
+             data: volume,
+             tooltip: {
+             valueDecimals: 0,
+             },
+             yAxis: 1,
+             dataGrouping: {
+             enabled: false,
+             },
+         },
+  
+         ],
+     });
+  </script>
+{% endblock content %}

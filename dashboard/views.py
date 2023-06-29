@@ -14,10 +14,7 @@ def home(request):
 
     time_change = timedelta(minutes=30)
     today = datetime.strptime((str(endTime) + ' 00:00:00'), '%Y-%m-%d %H:%M:%S')
-    print(endTime)
-    print(today)
     new_time = today - time_change
-    print(new_time)
 
     startTime = endTime - timedelta(days=7)
     endTime = str(endTime) + 'T00:00:00.000Z'
@@ -75,3 +72,20 @@ def bitso(request):
     context = {"volume":volume, "exportData":exportData}
 
     return render(request, 'dashboard/bitso.html', context=context)
+
+def bitstamp(request):
+    volume = []
+    exportData = []
+
+    response = requests.get('https://www.bitstamp.net/api/v2/ohlc/xrpeur/?limit=1000&step=1800')
+    data = response.json()
+    dictionary = Dict(data)
+
+    #print(dictionary)
+    for x in dictionary.data.ohlc:
+        volume.append([int(x.timestamp + '000'), float(x.volume)])
+        exportData.append([datetime.fromtimestamp(int(x.timestamp)).strftime('%Y-%m-%d %H:%M:%S'), float(x.volume)])
+
+    context = {"volume":volume, "exportData":exportData}
+
+    return render(request, 'dashboard/bitstamp.html', context=context)
