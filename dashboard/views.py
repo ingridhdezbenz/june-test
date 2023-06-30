@@ -76,16 +76,22 @@ def bitso(request):
 def bitstamp(request):
     volume = []
     exportData = []
+    exportDataRaw = []
 
     response = requests.get('https://www.bitstamp.net/api/v2/ohlc/xrpeur/?limit=1000&step=1800')
     data = response.json()
     dictionary = Dict(data)
 
-    #print(dictionary)
     for x in dictionary.data.ohlc:
         volume.append([int(x.timestamp + '000'), float(x.volume)])
         exportData.append([datetime.fromtimestamp(int(x.timestamp)).strftime('%Y-%m-%d %H:%M:%S'), float(x.volume)])
 
-    context = {"volume":volume, "exportData":exportData}
+    response = requests.get('https://www.bitstamp.net/api/v2/transactions/xrpeur/?time=day')
+    data = response.json()
+
+    for x in data:
+        exportDataRaw.append([datetime.fromtimestamp(int(x['date'])).strftime('%Y-%m-%d %H:%M:%S'), float(x['price']), float(x['amount'])])
+
+    context = {"volume":volume, "exportData":exportData, "exportDataRaw":exportDataRaw}
 
     return render(request, 'dashboard/bitstamp.html', context=context)

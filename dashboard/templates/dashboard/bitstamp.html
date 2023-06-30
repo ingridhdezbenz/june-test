@@ -5,6 +5,7 @@
 <div id="container" style="height: 400px; min-width: 310px"></div>
 
 <button onclick="download_csv_file()">Download 30 min Volume</button>
+<button onclick="download_csv_file_raw()">Download all trades from last 24hrs</button>
 
 <script src="https://code.highcharts.com/stock/highstock.js"></script>
 <script src="https://code.highcharts.com/stock/modules/data.js"></script>
@@ -37,6 +38,30 @@
         hiddenElement.click();
     }
 </script>
+<script>
+    exportDataRaw = {{exportDataRaw|safe}};
+  
+    function download_csv_file_raw() {
+  
+        //define the heading for each row of the data
+        var csv = 'Timestamp,Price,Volume\n';
+  
+        //merge the data with CSV
+        exportDataRaw.forEach(function(row) {
+                csv += row.join(',');
+                csv += "\n";
+        });
+  
+  
+        var hiddenElement = document.createElement('a');
+        hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+        hiddenElement.target = '_blank';
+  
+        //provide the name for the CSV file to be downloaded
+        hiddenElement.download = 'bitstamp.csv';
+        hiddenElement.click();
+    }
+  </script>
 <script>
     volume = {{volume|safe}};
   
