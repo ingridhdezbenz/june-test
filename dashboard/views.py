@@ -16,10 +16,10 @@ def home(request):
     today = datetime.strptime((str(endTime) + ' 00:00:00'), '%Y-%m-%d %H:%M:%S')
     new_time = today - time_change
 
-    startTime = endTime - timedelta(days=7)
+    startTime = endTime - timedelta(days=42)
     endTime = str(endTime) + 'T00:00:00.000Z'
     startTime = str(startTime) + 'T00:00:00.000Z'
-    response = requests.get('https://services.pdax.ph/api/exchange/v2/system_trades?from={}&to={}&max=5000'.format(startTime,endTime))
+    response = requests.get('https://services.pdax.ph/api/exchange/v2/system_trades?from={}&to={}&max=900000'.format(startTime,endTime))
     data = response.json()
     dictionary = Dict(data)
 
