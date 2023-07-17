@@ -88,12 +88,22 @@ a.article-title:hover {
   font-size: 2.5rem;
 }
 
-.table-x th {
+/*.table-x th {
   cursor: pointer;
   color: #fff;
-}
+}*/
 
 img {
   height: 6%;
   width: 6%;
 }
+
+/* AFTER BOOTSTRAP */
+.my-custom-scrollbar {
+  position: relative;
+  height: 200px;
+  overflow: auto;
+  }
+  .table-wrapper-scroll-y {
+  display: block;
+  }

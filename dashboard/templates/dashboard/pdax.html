@@ -1,11 +1,12 @@
 {% extends "dashboard/base.html" %} {% block content %}
 <div class="container" style="margin-top: 5rem;">
-    <h3>XRP_MXN</h3>
+    <h3>XRP</h3>
     <p>Time is CET minus 2hrs</p>
 
     <div id="container" style="height: 400px; min-width: 310px"></div>
 
     <button onclick="download_csv_file()">Download 30 min Volume</button>
+    <button onclick="download_csv_file_raw()">Download All Data</button>
 </div>
 <script src="https://code.highcharts.com/stock/highstock.js"></script>
 <script src="https://code.highcharts.com/stock/modules/data.js"></script>
@@ -14,41 +15,67 @@
 <script src="https://code.highcharts.com/modules/accessibility.js"></script>
 
 <script>
-    exportData = {{exportData|safe}};
-  
-    //create a user-defined function to download CSV file
-    function download_csv_file() {
-  
-        //define the heading for each row of the data
-        var csv = 'Timestamp,Volume\n';
-  
-        //merge the data with CSV
-        exportData.forEach(function(row) {
-                csv += row.join(',');
-                csv += "\n";
-        });
-  
-  
-        var hiddenElement = document.createElement('a');
-        hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
-        hiddenElement.target = '_blank';
-  
-        //provide the name for the CSV file to be downloaded
-        hiddenElement.download = 'bitso_30min.csv';
-        hiddenElement.click();
-    }
+  exportData = {{exportData|safe}};
+
+  //create a user-defined function to download CSV file
+  function download_csv_file() {
+
+      //define the heading for each row of the data
+      var csv = 'Timestamp,Volume\n';
+
+      //merge the data with CSV
+      exportData.forEach(function(row) {
+              csv += row.join(',');
+              csv += "\n";
+      });
+
+
+      var hiddenElement = document.createElement('a');
+      hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+      hiddenElement.target = '_blank';
+
+      //provide the name for the CSV file to be downloaded
+      hiddenElement.download = 'pdax_30min.csv';
+      hiddenElement.click();
+  }
 </script>
 <script>
+  exportDataRaw = {{exportDataRaw|safe}};
+
+  function download_csv_file_raw() {
+
+      //define the heading for each row of the data
+      var csv = 'Timestamp,Price,Volume\n';
+
+      //merge the data with CSV
+      exportDataRaw.forEach(function(row) {
+              csv += row.join(',');
+              csv += "\n";
+      });
+
+
+      var hiddenElement = document.createElement('a');
+      hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+      hiddenElement.target = '_blank';
+
+      //provide the name for the CSV file to be downloaded
+      hiddenElement.download = 'pdax.csv';
+      hiddenElement.click();
+  }
+</script>
+
+<script>
+  //price = {{price|safe}};
   volume = {{volume|safe}};
 
    // create the chart
    Highcharts.stockChart("container", {
        title: {
-       text: "Bitso trades",
+       text: "PDAX trades",
        },
 
        subtitle: {
-       text: "XRP_MXN",
+       text: "trades from the last 7 days",
        },
 
        xAxis: {
@@ -139,7 +166,7 @@
 
        series: [
        {
-           name: "volume",
+           name: "xrp traded amount",
            type: "column",
            data: volume,
            tooltip: {
@@ -154,4 +181,35 @@
        ],
    });
 </script>
+<!--
+    {
+           name: "price",
+
+           data: price,
+           gapSize: 5,
+           tooltip: {
+           valueDecimals: 2,
+           },
+
+           fillColor: {
+           linearGradient: {
+               x1: 0,
+               y1: 0,
+               x2: 0,
+               y2: 1,
+           },
+           stops: [
+               [0, Highcharts.getOptions().colors[0]],
+               [
+               1,
+               Highcharts.color(Highcharts.getOptions().colors[0])
+                   .setOpacity(0)
+                   .get("rgba"),
+               ],
+           ],
+           },
+
+           threshold: null,
+       },
+-->
 {% endblock content %}

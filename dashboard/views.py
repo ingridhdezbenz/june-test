@@ -2,9 +2,50 @@ from django.shortcuts import render
 import requests
 from datetime import date, timedelta, datetime
 from addict import Dict
+from django.http import JsonResponse
 
-# Create your views here.
-def home(request):
+# GET DATA
+def getKrakenData(request):
+    krakenData = []
+
+    # KRAKEN
+    response = requests.get('https://api.kraken.com/0/public/Ticker?pair=USDTEUR')
+    data = response.json()
+    dictionary = Dict(data)
+    usdtEurBid = float(dictionary.result.USDTEUR.b[0])
+    krakenData.append(usdtEurBid) # 0
+    usdtEurAsk = float(dictionary.result.USDTEUR.a[0])
+    krakenData.append(usdtEurAsk) # 1
+
+    response = requests.get('https://api.kraken.com/0/public/Ticker?pair=USDTUSD')
+    data = response.json()
+    dictionary = Dict(data)
+    usdtUsdBid = float(dictionary.result.USDTZUSD.b[0])
+    krakenData.append(usdtUsdBid) # 2
+
+    # ALPHA VANTAGE -- KJTZ254G0YEUR0VI
+    response = requests.get('https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=EUR&to_currency=USD&apikey=KJTZ254G0YEUR0VI')
+    data = response.json()
+    eurUsd = float(data["Realtime Currency Exchange Rate"]["5. Exchange Rate"])
+    krakenData.append(eurUsd) # 3
+
+    # EFFECTIVE RATE
+    effectiveRateBid = 1 / usdtEurBid / usdtUsdBid
+    krakenData.append(effectiveRateBid) # 4
+    effectiveRateAsk = 1 / usdtEurAsk / usdtUsdBid
+    krakenData.append(effectiveRateAsk) # 5
+
+    # SELL USDT FOR EUR ON FX
+    sellUSDTBid = effectiveRateBid / eurUsd - 1
+    krakenData.append(sellUSDTBid) # 6 
+    sellUSDTAsk = effectiveRateAsk / eurUsd - 1
+    krakenData.append(sellUSDTAsk) # 7
+
+    context = {"krakenData": krakenData}
+
+    return JsonResponse(context)
+
+def getPdaxData():
     price = []
     volume = []
     exportData = []
@@ -40,24 +81,21 @@ def home(request):
             acum_volume = 0
             price_lst = []
         if datetime.utcfromtimestamp(int(x.timestamp[0:-3])) > new_time:
-            #price.append([int(x.timestamp[0:-3] + '000'), x.price, x.price, x.price, x.price])
-            #volume.append([int(x.timestamp[0:-3] + '000'), x.traded_amount])
             acum_volume = acum_volume + x.traded_amount
             price_lst.append(x.price)
             
-            
-        #else:
-            #x.timestamp[0:-3] + '000'
-            
-    
     price = price[::-1]
     volume = volume[::-1]
 
-    context = {"price":price, "volume":volume, "exportData":exportData, "exportDataRaw":exportDataRaw}
+    contextList = []
+    contextList.append(price)
+    contextList.append(volume)
+    contextList.append(exportData)
+    contextList.append(exportDataRaw)
 
-    return render(request, 'dashboard/home.html', context=context)
+    return contextList
 
-def bitso(request):
+def getBitsoData():
     volume = []
     exportData = []
 
@@ -69,11 +107,13 @@ def bitso(request):
         volume.append([x.bucket_start_time, float(x.volume)])
         exportData.append([datetime.fromtimestamp(x.bucket_start_time/1000.0).strftime('%Y-%m-%d %H:%M:%S'), float(x.volume)])
 
-    context = {"volume":volume, "exportData":exportData}
+    contextList = []
+    contextList.append(volume)
+    contextList.append(exportData)
 
-    return render(request, 'dashboard/bitso.html', context=context)
+    return contextList
 
-def bitstamp(request):
+def getBitstampData():
     volume = []
     exportData = []
     exportDataRaw = []
@@ -92,6 +132,40 @@ def bitstamp(request):
     for x in data:
         exportDataRaw.append([datetime.fromtimestamp(int(x['date'])).strftime('%Y-%m-%d %H:%M:%S'), float(x['price']), float(x['amount'])])
 
-    context = {"volume":volume, "exportData":exportData, "exportDataRaw":exportDataRaw}
+    contextList = []
+    contextList.append(volume)
+    contextList.append(exportData)
+    contextList.append(exportDataRaw)
+
+    return contextList
+
+# VIEWS
+def home(request):
+    pdaxData = getPdaxData()
+    bitsoData = getBitsoData()
+    bitstampData = getBitstampData()    
+
+    context = {"pdaxVolume": pdaxData[1], "pdaxTable": pdaxData[3], "bitsoVolume": bitsoData[0], "bitsoTable": bitsoData[1], "bitstampVolume": bitstampData[0], "bitstampTable": bitstampData[2]}
+
+    return render(request, 'dashboard/home.html', context=context)
+
+def pdax(request):
+    pdaxData = getPdaxData()
+
+    context = {"volume": pdaxData[1], "exportData": pdaxData[2], "exportDataRaw": pdaxData[3]}
+
+    return render(request, 'dashboard/pdax.html', context=context)
+
+def bitso(request):
+    bitsoData = getBitsoData()
+
+    context = {"volume":bitsoData[0], "exportData":bitsoData[1]}
+
+    return render(request, 'dashboard/bitso.html', context=context)
+
+def bitstamp(request):
+    bitstampData = getBitstampData()
+    
+    context = {"volume":bitstampData[0], "exportData":bitstampData[1], "exportDataRaw":bitstampData[2]}
 
     return render(request, 'dashboard/bitstamp.html', context=context)
