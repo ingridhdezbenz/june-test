@@ -8,6 +8,9 @@
     <button onclick="download_csv_file()">Download 30 min Volume</button>
     <button onclick="download_csv_file_raw()">Download All Data</button>
 </div>
+<div class="container" style="margin-top: 5rem;">
+    <div id="pdaxTable" style="height: 400px; min-width: 310px"></div>
+</div>
 <script src="https://code.highcharts.com/stock/highstock.js"></script>
 <script src="https://code.highcharts.com/stock/modules/data.js"></script>
 <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
@@ -212,4 +215,28 @@
            threshold: null,
        },
 -->
+<script>
+    pdaxTable = {{dayVolume|safe}};
+    var temp = `
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Timestamp</th>
+                <th scope="col">Volume</th>
+            </tr>
+        </thead>
+        <tbody>`; 
+    for(let i = 0; i < 40; i++){
+        temp += `
+            <tr>
+                <td> ` + String(pdaxTable[i][0]) + `</td>
+                <td> ` + String(Math.round((pdaxTable[i][1] + Number.EPSILON) * 100) / 100) + `</td>
+            </tr>`;
+    }
+    temp += `
+    </tbody>
+    </table>`;
+    document.getElementById('pdaxTable').innerHTML = temp;
+
+</script>
 {% endblock content %}

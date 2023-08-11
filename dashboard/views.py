@@ -3,6 +3,8 @@ import requests
 from datetime import date, timedelta, datetime
 from addict import Dict
 from django.http import JsonResponse
+import pandas as pd
+import csv
 
 # GET DATA
 def getKrakenData(request):
@@ -84,14 +86,26 @@ def getPdaxData():
             acum_volume = acum_volume + x.traded_amount
             price_lst.append(x.price)
             
+    
     price = price[::-1]
     volume = volume[::-1]
+
+    df = pd.DataFrame(exportDataRaw, columns = ['date', 'price', 'volume'])
+    df['date'] = pd.to_datetime(df.date, format='%Y-%m-%d %H:%M:%S')
+    #df = df.groupby(df.date.dt.day)['volume'].sum()
+    #df.groupby(df.date.dt.day).agg({'volume': 'sum', 'price':'first'}).reset_index()
+    #df.groupby(pd.Grouper(key='date', freq='1D')).sum()
+    df = df.groupby(pd.Grouper(key='date', axis=0, freq='1D')).sum()
+    dayVolume = []
+    for index, row in df.iterrows():
+        dayVolume.append([str(index)[0:-9], row[1]])
 
     contextList = []
     contextList.append(price)
     contextList.append(volume)
     contextList.append(exportData)
     contextList.append(exportDataRaw)
+    contextList.append(dayVolume)
 
     return contextList
 
@@ -111,7 +125,7 @@ def getBitsoData():
     contextList.append(volume)
     contextList.append(exportData)
 
-    return contextList
+    return contextList      
 
 def getBitstampData():
     volume = []
@@ -152,14 +166,20 @@ def home(request):
 def pdax(request):
     pdaxData = getPdaxData()
 
-    context = {"volume": pdaxData[1], "exportData": pdaxData[2], "exportDataRaw": pdaxData[3]}
+    context = {"volume": pdaxData[1], "exportData": pdaxData[2], "exportDataRaw": pdaxData[3], "dayVolume": pdaxData[4]}
 
     return render(request, 'dashboard/pdax.html', context=context)
 
 def bitso(request):
     bitsoData = getBitsoData()
 
-    context = {"volume":bitsoData[0], "exportData":bitsoData[1]}
+    file = open("dashboard/static/dashboard/data_btcbitso.csv")
+    csvreader = csv.reader(file)
+    btcPremium = []
+    for row in csvreader:
+       btcPremium.append([int(row[0]), (float(row[1]))])
+
+    context = {"volume":bitsoData[0], "exportData":bitsoData[1], "btcPremium":btcPremium}
 
     return render(request, 'dashboard/bitso.html', context=context)
 
