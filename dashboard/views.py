@@ -100,12 +100,15 @@ def getPdaxData():
     for index, row in df.iterrows():
         dayVolume.append([str(index)[0:-9], row[1]])
 
+    lenVol = len(dayVolume)
+
     contextList = []
     contextList.append(price)
     contextList.append(volume)
     contextList.append(exportData)
     contextList.append(exportDataRaw)
     contextList.append(dayVolume)
+    contextList.append(lenVol)
 
     return contextList
 
@@ -166,7 +169,7 @@ def home(request):
 def pdax(request):
     pdaxData = getPdaxData()
 
-    context = {"volume": pdaxData[1], "exportData": pdaxData[2], "exportDataRaw": pdaxData[3], "dayVolume": pdaxData[4]}
+    context = {"volume": pdaxData[1], "exportData": pdaxData[2], "exportDataRaw": pdaxData[3], "dayVolume": pdaxData[4], "lenVol": pdaxData[5]}
 
     return render(request, 'dashboard/pdax.html', context=context)
 
