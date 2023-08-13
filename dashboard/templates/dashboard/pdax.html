@@ -217,11 +217,8 @@
 -->
 <script>
     pdaxTable = {{dayVolume|safe}};
-<<<<<<< HEAD
     lenVol = {{lenVol|safe}};
-=======
-    lenVol = 42;
->>>>>>> 3518f28c96d5d8e7f4371f267f10458925bea897
+
     var temp = `
     <table class="table table-bordered">
         <thead class="table-dark" style="text-align:center">
@@ -231,7 +228,7 @@
             </tr>
         </thead>
         <tbody>`; 
-    for(let i = 0; i < lenVol-1; i++){
+    for(let i = 0; i < lenVol-3; i++){
         var auxDate  = new Date(String(pdaxTable[i][0])+"T00:00:00");
         const result = (auxDate.getDay() === 6 || auxDate.getDay() === 0) ? 'class="table-info"' : '';
         

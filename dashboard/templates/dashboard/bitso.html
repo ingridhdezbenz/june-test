@@ -7,11 +7,11 @@
 
     <button onclick="download_csv_file()">Download 30 min Volume</button>
 </div>
-<!--<div class="container" style="margin-top: 5rem;">
+<div class="container" style="margin-top: 5rem;">
     <h3>BTC premium</h3>
 
     <div id="container_btc" style="height: 400px; min-width: 310px"></div>
-</div>!-->
+</div>
 
 <script src="https://code.highcharts.com/stock/highstock.js"></script>
 <script src="https://code.highcharts.com/modules/boost.js"></script>
@@ -169,42 +169,13 @@
     pointEnd = Date.UTC(2023, 7, 6, 20),
     pointInterval = 24 * 36e5;
 
-    function getData(n) {
-        var arr = [],
-            i,
-            a,
-            b,
-            c,
-            spike;
-        for (i = 0; i < n; i = i + 1) {
-            if (i % 100 === 0) {
-                a = 2 * Math.random();
-            }
-            if (i % 1000 === 0) {
-                b = 2 * Math.random();
-            }
-            if (i % 10000 === 0) {
-                c = 2 * Math.random();
-            }
-            if (i % 50000 === 0) {
-                spike = 0;
-            } else {
-                spike = 0;
-            }
-            arr.push([
-                pointStart + i * pointInterval,
-                2 * Math.sin(i / 100) + a + b + c + spike + Math.random()
-            ]);
-        }
-        return arr;
-    }
-
     function getSeries(n, s) {
         var i = 0,
             r = [];
 
         for (; i < s; i++) {
             r.push({
+                name: 'bps',
                 data: btcPremium,
                 dataGrouping: {
                     enabled: false
@@ -224,7 +195,8 @@
                 },
                 boostThreshold: 1,
                 turboThreshold: 1,
-                showInNavigator: true
+                showInNavigator: true,
+                
             });
         }
 
@@ -233,15 +205,10 @@
 
     var series = getSeries(n, s);
 
-
     Highcharts.stockChart('container_btc', {
 
-        //chart: {
-        //    zoomType: 'x'
-        //},
-
         title: {
-            text: 'Highcharts series'
+            text: 'Weekends BTC Bitso Premium'
         },
 
         navigator: {
@@ -272,15 +239,9 @@
         xAxis: {
             min: pointStart,
             max: pointEnd, //pointStart + n * pointInterval,
-            ordinal: false
+            ordinal: false,
+           
         },
-
-        
-
-        subtitle: {
-            text: 'Using the Boost module'
-        },
-
         tooltip: {
             valueDecimals: 6,
             //split: false
