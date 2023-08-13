@@ -100,6 +100,7 @@ def getPdaxData():
     for index, row in df.iterrows():
         dayVolume.append([str(index)[0:-9], row[1]])
 
+    dayVolume = dayVolume[::-1]
     lenVol = len(dayVolume)
 
     contextList = []

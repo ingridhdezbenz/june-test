@@ -8,8 +8,8 @@
     <button onclick="download_csv_file()">Download 30 min Volume</button>
     <button onclick="download_csv_file_raw()">Download All Data</button>
 </div>
-<div class="container" style="margin-top: 5rem;">
-    <div id="pdaxTable" style="height: 400px; min-width: 310px"></div>
+<div class="overflow-scroll" style="margin-top: 5rem; height: 400px; max-width: 310px; margin-left: 5rem;">
+    <div id="pdaxTable"></div>
 </div>
 <script src="https://code.highcharts.com/stock/highstock.js"></script>
 <script src="https://code.highcharts.com/stock/modules/data.js"></script>
@@ -217,21 +217,24 @@
 -->
 <script>
     pdaxTable = {{dayVolume|safe}};
-    lenVol = {{lenvol|safe}};
+    lenVol = {{lenVol|safe}};
     var temp = `
-    <table class="table table-striped">
-        <thead>
+    <table class="table table-bordered">
+        <thead class="table-dark" style="text-align:center">
             <tr>
                 <th scope="col">Timestamp</th>
                 <th scope="col">Volume</th>
             </tr>
         </thead>
         <tbody>`; 
-    for(let i = 0; i < lenVol; i++){
+    for(let i = 0; i < lenVol-1; i++){
+        var auxDate  = new Date(String(pdaxTable[i][0])+"T00:00:00");
+        const result = (auxDate.getDay() === 6 || auxDate.getDay() === 0) ? 'class="table-info"' : '';
+        
         temp += `
-            <tr>
+            <tr ` + result + ` style="text-align:center">
                 <td> ` + String(pdaxTable[i][0]) + `</td>
-                <td> ` + String(Math.round((pdaxTable[i][1] + Number.EPSILON) * 100) / 100) + `</td>
+                <td> ` + String(Math.round((pdaxTable[i][1] + Number.EPSILON) * 100) / 100).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + `</td>
             </tr>`;
     }
     temp += `
